@@ -56,7 +56,7 @@ print(f"Cleaned data saved to: {CLEAN_PATH}")
 # 4. Data Quality Check (QA)
 # ==============================
 
-print("\n=== 🧪 Data Quality Check ===")
+print("\n=== Data Quality Check ===")
 print("Null values:\n", df_main.isnull().sum())
 print("\nDuplicated rows:", df_main.duplicated().sum())
 print("\nSummary statistics:\n", df_main.describe())
