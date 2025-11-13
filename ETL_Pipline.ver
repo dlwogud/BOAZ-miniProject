@@ -56,7 +56,6 @@ print(f"Cleaned data saved to: {CLEAN_PATH}")
 # 4. Data Quality Check (QA)
 # ==============================
 
-print("\n=== Data Quality Check ===")
 print("Null values:\n", df_main.isnull().sum())
 print("\nDuplicated rows:", df_main.duplicated().sum())
 print("\nSummary statistics:\n", df_main.describe())
@@ -90,7 +89,6 @@ plt.show()
 # 6. Load to SQLite DB
 # ==============================
 
-print("\n Creating SQLite DB...")
 conn = sqlite3.connect(DB_PATH)
 
 df_main.to_sql('steam_games', conn, if_exists='replace', index=False)
@@ -110,8 +108,6 @@ GROUP BY release_year
 ORDER BY release_year;
 """
 
-print("\n=== SQL Query Result ===")
 print(pd.read_sql_query(query, conn).head())
 
 conn.close()
-print("\n ETL Pipeline Completed!")
