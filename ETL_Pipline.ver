@@ -1,7 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import sqlite3
-
+import numpy as np
+import ast
 
 # ==============================
 # 1. Extract
@@ -20,7 +21,6 @@ print(df.info())
 # 2. Transform
 # ==============================
 
-# 필요한 컬럼만 추출
 cols = [
     'appid', 'name', 'release_date', 'price',
     'developers', 'publishers', 'genres', 'categories',
@@ -33,16 +33,52 @@ df_main = df[cols].copy()
 
 # 날짜 변환
 df_main['release_date'] = pd.to_datetime(df_main['release_date'], errors='coerce')
-
-# 전체 긍정률 → positive_rate로 사용
-df_main['positive_rate'] = df_main['pct_pos_total']
-
-# 출시 연도 생성
 df_main['release_year'] = df_main['release_date'].dt.year
 
-# 수익 추정치 생성
+# 긍정률
+df_main['positive_rate'] = df_main['pct_pos_total']
+
+# 수익 추정치
 df_main['est_revenue'] = df_main['price'] * df_main['num_reviews_total']
 
+
+# ==============================
+# 2-1. Data Quality Check
+# ==============================
+
+#리뷰 수 검증: positive + negative > total이면 flag
+df_main['invalid_review'] = (
+    df_main['positive'] + df_main['negative'] > df_main['num_reviews_total']
+)
+
+#미래 출시일 flag
+df_main['future_release'] = df_main['release_date'] > pd.Timestamp.today()
+
+print("\nQA rule results:")
+print(df_main[['invalid_review', 'future_release']].sum())
+
+
+# ==============================
+# 2-2. genres explode
+# ==============================
+
+valid_genres = {
+    "Action", "Adventure", "RPG", "Strategy", "Simulation",
+    "Sports", "Racing", "Indie", "Casual"
+}
+
+# 문자열 → 리스트 변환
+df_main['genres'] = df_main['genres'].apply(lambda x: ast.literal_eval(str(x)))
+
+# explode
+df_genres = df_main[['appid', 'genres']].explode('genres')
+df_genres.rename(columns={'genres': 'genre'}, inplace=True)
+df_genres['genre'] = df_genres['genre'].str.strip()
+
+# 순수 장르만 필터링
+df_genres = df_genres[df_genres['genre'].isin(valid_genres)]
+
+print(df_genres.head())
 
 # ==============================
 # 3. Load (CSV 저장)
@@ -53,28 +89,17 @@ print(f"Cleaned data saved to: {CLEAN_PATH}")
 
 
 # ==============================
-# 4. Data Quality Check (QA)
+# 4. 기본 QA 시각화
 # ==============================
 
-print("Null values:\n", df_main.isnull().sum())
-print("\nDuplicated rows:", df_main.duplicated().sum())
-print("\nSummary statistics:\n", df_main.describe())
-
-
-# ==============================
-# 5. 기본 QA 시각화
-# ==============================
-
-# (1) 연도별 출시 추이
 plt.figure(figsize=(10, 4))
 df_main.groupby('release_year')['appid'].count().plot(kind='bar')
-plt.title("Number of Games Released by Year (QA)")
+plt.title("Number of Games Released by Year")
 plt.xlabel("Release Year")
 plt.ylabel("Game Count")
 plt.tight_layout()
 plt.show()
 
-# (2) 리뷰 수 vs 긍정률
 plt.figure(figsize=(8, 5))
 plt.scatter(df_main['num_reviews_total'], df_main['positive_rate'], alpha=0.3)
 plt.xscale('log')
@@ -86,28 +111,41 @@ plt.show()
 
 
 # ==============================
-# 6. Load to SQLite DB
+# 5. Load to SQLite DB
 # ==============================
+df_main['genres'] = df_main['genres'].astype(str)#SQLite은 리스트 불가능
 
 conn = sqlite3.connect(DB_PATH)
 
 df_main.to_sql('steam_games', conn, if_exists='replace', index=False)
+df_genres.to_sql('game_genres', conn, if_exists='replace', index=False)
+
 print(f"Data loaded into SQLite DB: {DB_PATH}")
 
+
 # ==============================
-# 7. SQL Query Validation
+# 6. SQL Query
 # ==============================
 
-query = """
-SELECT 
-    release_year, 
-    COUNT(*) AS game_count, 
-    AVG(price) AS avg_price
-FROM steam_games
-GROUP BY release_year
+query= """
+WITH base AS (
+    SELECT 
+        release_year,
+        AVG(price) AS avg_price
+    FROM steam_games
+    GROUP BY release_year
+)
+SELECT
+    release_year,
+    avg_price,
+    avg_price - LAG(avg_price) OVER (ORDER BY release_year) AS diff_from_prev
+FROM base
 ORDER BY release_year;
 """
 
+print("\nYearly price change :")
 print(pd.read_sql_query(query, conn).head())
 
+
 conn.close()
+print("ETL Completed.")
