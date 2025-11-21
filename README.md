@@ -1,5 +1,5 @@
-BOAZ-miniProject
-Steam Games ETL Project (2025)
+#BOAZ-miniProject
+#Steam Games ETL Project (2025)
 
 이 프로젝트는 2025년 3월까지 수집된 Steam 게임 데이터를 활용해
 ETL 파이프라인 → 데이터 품질 검증(QA) → 구조화 테이블 생성 → 기본 SQL 분석까지 수행한
