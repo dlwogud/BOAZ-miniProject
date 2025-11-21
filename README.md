@@ -59,9 +59,8 @@ Steam 게임 데이터에서 분석 및 적재에 필요한 핵심 컬럼만 선
 | Rule 2 — 미래 출시일 검증 | release_date > 오늘 날짜 → future_release = True |
 
 **예시 출력**
-|--------|----|
-|invalid_review  |  12  |
-|future_release  |   3   |
+invalid_review    12
+future_release     3
 
 # 5. Genre Normalization (explode)
 
