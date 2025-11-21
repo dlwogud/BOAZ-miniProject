@@ -59,7 +59,7 @@ Steam 게임 데이터에서 분석 및 적재에 필요한 핵심 컬럼만 선
 | Rule 2 — 미래 출시일 검증 | release_date > 오늘 날짜 → future_release = True |
 
 **예시 출력**
-
+|--------|----|
 |invalid_review  |  12  |
 |future_release  |   3   |
 
@@ -122,6 +122,7 @@ ORDER BY release_year;
 출력 예:
 
 |release_year|	avg_price|	diff_from_prev|
+|--------|-----|-------|
 |2013|	9.52|	NULL|
 |2014|	10.17|	0.65|
 …	…	…
