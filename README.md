@@ -34,35 +34,30 @@
 ```python
 df = pd.read_csv(RAW_PATH, encoding='utf-8')
 
-#  3. Transform
-✔ 핵심 14개 컬럼으로 정제
+# 3. Transform
 
-필요 컬럼만 선택하여 목적 중심의 구조 생성.
+Steam 게임 데이터에서 분석 및 적재에 필요한 핵심 컬럼만 선택하고,  
+날짜/리뷰/수익 등 주요 정보를 정제한 단계입니다.
 
-✔ 날짜(Date) 처리
-release_date → datetime64  
-release_year → int
+| 작업 | 설명 |
+|------|------|
+| 컬럼 정제 | 원본 47개 중 14개 핵심 컬럼만 선택 |
+| 날짜 처리 | release_date → datetime64 변환, release_year 생성 |
+| 긍정률 생성 | positive_rate = pct_pos_total |
+| 수익 추정 | est_revenue = price × num_reviews_total |
 
-✔ 긍정률 생성
-
-positive_rate = pct_pos_total
-
-✔ 수익 추정치 생성
-est_revenue = price × num_reviews_total
+---
 
 # 4. Data Quality Check (QA)
 
-ETL 신뢰성을 위해 2가지 논리적 검증 규칙 적용.
+데이터 무결성과 신뢰성을 확보하기 위한 논리적 검증 규칙을 적용했습니다.
 
-✔ Rule 1 — 리뷰 수 검증
+| QA 규칙 | 설명 |
+|---------|------|
+| Rule 1 — 리뷰 수 무결성 | positive + negative > total 이면 invalid_review = True |
+| Rule 2 — 미래 출시일 검증 | release_date > 오늘 날짜 → future_release = True |
 
-positive + negative > num_reviews_total → 비정상 flag
-
-✔ Rule 2 — 미래 출시일 검증
-
-release_date > 오늘 날짜 → 데이터 오염 가능성 flag
-
-출력 예:
+**예시 출력**
 
 invalid_review    12
 future_release     3
