@@ -60,8 +60,8 @@ Steam 게임 데이터에서 분석 및 적재에 필요한 핵심 컬럼만 선
 
 **예시 출력**
 
-invalid_review    12
-future_release     3
+|invalid_review  |  12  |
+|future_release  |   3   |
 
 # 5. Genre Normalization (explode)
 
@@ -75,10 +75,12 @@ Steam의 genres 는 "['Action','Adventure']" 형태 문자열이므로
 
 생성 예시:
 
-appid	genre
-730	Action
-570	Strategy
-359550	Action
+|appid|	genre|
+|-----|------|
+|730|Action|
+|570|Strategy|
+|359550	|Action|
+
 # 6. Load
 ✔ CSV 저장
 df_main.to_csv(CLEAN_PATH, index=False)
@@ -119,9 +121,9 @@ ORDER BY release_year;
 
 출력 예:
 
-release_year	avg_price	diff_from_prev
-2013	9.52	NULL
-2014	10.17	0.65
+|release_year|	avg_price|	diff_from_prev|
+|2013|	9.52|	NULL|
+|2014|	10.17|	0.65|
 …	…	…
 # 9. Tech Stack
 
