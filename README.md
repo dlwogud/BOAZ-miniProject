@@ -31,9 +31,10 @@
 - Kaggle Steam dataset 로딩  
 - 총 89,618개의 게임 레코드  
 - dtype 검사 및 원본 컬럼 구조 파악
-```python
+python
 df = pd.read_csv(RAW_PATH, encoding='utf-8')
 
+---
 # 3. Transform
 
 Steam 게임 데이터에서 분석 및 적재에 필요한 핵심 컬럼만 선택하고,  
